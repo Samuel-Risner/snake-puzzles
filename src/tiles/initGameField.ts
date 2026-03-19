@@ -1,4 +1,4 @@
-import type { T_GameFieldData, T_GameFieldDataProcessed } from "../types";
+import type { T_GameFieldDataProcessed } from "../types";
 import Tile from "./tile";
 import TileEnd from "./tileEnd";
 

@@ -1,31 +1,20 @@
 import CONSTANTS from "../constants";
 import type Tile from "../tiles/tile";
-import type { ValueOf, T_ColorNumbers, T_ColorName, T_TileTypeNumber, T_Directions } from "../types";
+import type { ValueOf, T_ColorName, T_TileTypeNumber, T_Directions } from "../types";
 import Connection from "./connection";
+import TileTypeBase from "./tileTypeBase";
 import type TileTypeInterface from "./tileTypeInterface";
 
-export default class Point implements TileTypeInterface {
-
-    private tile: Tile;
+export default class Point extends TileTypeBase implements TileTypeInterface {
 
     private connection: null | Connection = null;
 
-    private colorNumber: ValueOf<T_ColorNumbers>;
-    private color: string;
-    private element: HTMLElement;
-    private subElement: HTMLDivElement;
-
     constructor(tile: Tile, colorName: T_ColorName, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
+        super(tile, colorName);
+
         this.tile = tile;
-        
-        this.colorNumber = CONSTANTS.COLOR_NUMBERS[colorName];
-        this.color = CONSTANTS.COLORS[colorName];
 
-        this.element = document.createElement("div");
-        this.element.className = `w-6 h-6 rounded-full ${this.color}`;
-
-        this.subElement = document.createElement("div");
-        this.element.appendChild(this.subElement);
+        this.element.className = `absolute rounded-full ${this.colorTWCSS} ${CONSTANTS.SIZES.POINT.W} ${CONSTANTS.SIZES.POINT.H} ${CONSTANTS.SIZES.POINT.POS} ${CONSTANTS.SIZES.POINT.Z}`;
 
         const move = (e: MouseEvent) => {
             // when returning to the point the connections will be deleted
@@ -44,7 +33,7 @@ export default class Point implements TileTypeInterface {
             }
 
             // new connection
-            this.connection = new Connection(colorName, targetTile, true, direction);
+            this.connection = new Connection(colorName, targetTile, true, direction, registerMoveDetection);
             this.styleSubElement(direction);
         }
 
@@ -57,29 +46,46 @@ export default class Point implements TileTypeInterface {
         }
 
         this.element.addEventListener("mousedown", (e: MouseEvent) => {
-            console.log(e.clientX);
-            console.log(e.clientY);
-
             registerMoveDetection(move, up);
-        })
+        });
     }
 
     private styleSubElement(direction: ValueOf<T_Directions> | null) {
         switch (direction) {
             case CONSTANTS.DIRECTIONS.TOP:
-                this.subElement.className = `m-1 ${this.color} ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W} ${CONSTANTS.SIZES.CONNECTION.HALF_H}`;
+                this.subElement.className = `absolute rounded-t-full
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_BOTTOM}
+                    ${this.colorTWCSS}
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W}
+                    ${CONSTANTS.SIZES.CONNECTION.END_H}
+                `;
                 break;
                 
                 case CONSTANTS.DIRECTIONS.BOTTOM:
-                this.subElement.className = `-mt-1 mx-1 ${this.color} ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W} ${CONSTANTS.SIZES.CONNECTION.HALF_H}`;
+                this.subElement.className = `absolute rounded-b-full
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_TOP}
+                    ${this.colorTWCSS}
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W}
+                    ${CONSTANTS.SIZES.CONNECTION.END_H}
+                `;
                 break;
                 
                 case CONSTANTS.DIRECTIONS.LEFT:
-                this.subElement.className = `m-1 ${this.color} ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H} ${CONSTANTS.SIZES.CONNECTION.HALF_W}`;
+                this.subElement.className = `absolute rounded-l-full
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_RIGHT}
+                    ${this.colorTWCSS}
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H}
+                    ${CONSTANTS.SIZES.CONNECTION.END_W}
+                `;
                 break;
                 
                 case CONSTANTS.DIRECTIONS.RIGHT:
-                this.subElement.className = `-ml-1 my-1 ${this.color} ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H} ${CONSTANTS.SIZES.CONNECTION.HALF_W}`;
+                this.subElement.className = `absolute rounded-r-full
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_LEFT}
+                    ${this.colorTWCSS}
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H}
+                    ${CONSTANTS.SIZES.CONNECTION.END_W}
+                `;
                 break;
             
             // case null:
@@ -90,9 +96,5 @@ export default class Point implements TileTypeInterface {
 
     getTileType(): ValueOf<T_TileTypeNumber> {
         return CONSTANTS.TILE_TYPES.POINT;
-    }
-
-    getHTML(): HTMLElement {
-        return this.element;
     }
 }

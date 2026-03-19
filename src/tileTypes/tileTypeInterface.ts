@@ -4,6 +4,6 @@ export default interface TileTypeInterface {
 
     getTileType(): ValueOf<T_TileTypeNumber>;
 
-    getHTML(): HTMLElement;
+    appendToParent(parent: HTMLDivElement): void;
 
 }

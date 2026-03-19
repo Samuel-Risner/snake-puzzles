@@ -1,6 +1,6 @@
 export type ValueOf<T> = T[keyof T];
 
-export type T_TileTypeName = "EMPTY" | "POINT" | "CONNECTION";
+export type T_TileTypeName = "BLOCKED" | "EMPTY" | "POINT" | "CONNECTION" | "CONNECTION_END";
 export type T_TileTypeNumber = Record<T_TileTypeName, number>;
 
 export type T_ColorName = "RED" | "GREEN" | "YELLOW" | "BLUE";

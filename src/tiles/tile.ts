@@ -1,8 +1,7 @@
 import CONSTANTS from "../constants";
-import Connection from "../tileTypes/connection";
 import Point from "../tileTypes/point";
 import type TileTypeInterface from "../tileTypes/tileTypeInterface";
-import type { T_ColorName, T_Colors, T_Directions, T_GameFieldDataProcessed, ValueOf } from "../types";
+import type { T_ColorName, T_Directions, T_GameFieldDataProcessed, ValueOf } from "../types";
 import type TileEnd from "./tileEnd";
 import type TileInterface from "./tileInterface";
 
@@ -48,7 +47,7 @@ export default class Tile implements TileInterface {
             this.tileTypeElement = null;
         }
 
-        if (this.tileTypeElement !== null) this.element.appendChild(this.tileTypeElement.getHTML());
+        if (this.tileTypeElement !== null) this.tileTypeElement.appendToParent(this.element);
     }
 
     contains(x: number, y: number): boolean {
@@ -77,7 +76,7 @@ export default class Tile implements TileInterface {
     //
 
     startCreateElementRecursive(parent: HTMLElement): void {
-        parent.className = "flex flex-row";
+        parent.className = `flex flex-row z-0 ${CONSTANTS.SIZES.TILE.BORDER}`;
         this._createElementRecursiveCol(parent);
     }
 
@@ -98,7 +97,7 @@ export default class Tile implements TileInterface {
 
         const requiresBorderBottom = this.tileBottom._createElementRecursiveTile(parent, requiresBorderRight);
 
-        this.element.className = `${CONSTANTS.SIZES.TILE_W} ${CONSTANTS.SIZES.TILE_H} grid place-items-center border-black border-t-2 border-l-2 ${requiresBorderRight? "border-r-2" : ""} ${requiresBorderBottom? "border-b-2" : ""}`
+        this.element.className = `${CONSTANTS.SIZES.TILE.W} ${CONSTANTS.SIZES.TILE.H} z-0 relative flex items-center justify-center border-black ${CONSTANTS.SIZES.TILE.BORDER}`
 
         return false;
     }
@@ -113,7 +112,7 @@ export default class Tile implements TileInterface {
 
         this.tileTypeElement = t;
 
-        if (t !== null) this.element.appendChild(t.getHTML());
+        if (t !== null) t.appendToParent(this.element);
     }
 
     //

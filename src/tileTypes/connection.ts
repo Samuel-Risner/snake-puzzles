@@ -1,6 +1,7 @@
 import CONSTANTS from "../constants";
 import type Tile from "../tiles/tile";
-import type { T_ColorName, T_ColorNumbers, T_ConnectionDirection, T_Directions, T_TileTypeNumber, ValueOf } from "../types";
+import type { T_ColorName, T_Directions, T_TileTypeNumber, ValueOf } from "../types";
+import TileTypeBase from "./tileTypeBase";
 import type TileTypeInterface from "./tileTypeInterface";
 
 /**
@@ -10,9 +11,7 @@ import type TileTypeInterface from "./tileTypeInterface";
  */
 type T_Previous_Next = true | false | Connection;
 
-export default class Connection implements TileTypeInterface {
-
-    private tile: Tile;
+export default class Connection extends TileTypeBase implements TileTypeInterface {
 
     private previous: T_Previous_Next;
     private previousDirection: ValueOf<T_Directions>;
@@ -20,50 +19,257 @@ export default class Connection implements TileTypeInterface {
     private next: T_Previous_Next = false;
     private nextDirection: ValueOf<T_Directions> = CONSTANTS.DIRECTIONS.TOP;
 
-    private element: HTMLDivElement;
-
-    private colorNumber: ValueOf<T_ColorNumbers>;
-    private color: string;
-
-    constructor(colorName: T_ColorName, tile: Tile, previous: T_Previous_Next, previousDirection: ValueOf<T_Directions>) {
-        this.tile = tile;
+    constructor(colorName: T_ColorName, tile: Tile, previous: T_Previous_Next, previousDirection: ValueOf<T_Directions>, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
+        super(tile, colorName);
 
         this.previous = previous;
         this.previousDirection = previousDirection;
 
-        this.element = document.createElement("div");
         this.element.className = "w-4 h-4 bg-green-300";
-
-        this.colorNumber = CONSTANTS.COLOR_NUMBERS[colorName];
-        this.color = CONSTANTS.COLORS[colorName];
 
         this.tile.setTileType(this);
         this.setClassName();
+
+        const move = (e: MouseEvent) => {
+            console.log("CONNECTION MOVE");
+
+            // get next tile
+            const [targetTile, direction] = this.tile.getAdjacentTileIfContains(e.clientX, e.clientY);
+            if (targetTile === null) return;
+
+            console.log(direction);
+            this.nextDirection = direction;
+
+            // new connection
+            this.next = new Connection(colorName, targetTile, this, direction, registerMoveDetection);
+            this.setClassName();
+        }
+
+        const up = (e: MouseEvent) => {
+            console.log("CONNECTION UP");
+        }
+
+        registerMoveDetection(move, up);
     }
 
     setClassName() {
         // previous element exists but no next element
+        //  > previous element is point or another connection element
+        //  > next element does not exist
         if (this.previous !== false && this.next === false) {
 
             // coming from the bottom of the previous element
             if (this.previousDirection === CONSTANTS.DIRECTIONS.TOP) {
-                this.element.className = `mx-auto ${this.color} ${CONSTANTS.SIZES.CONNECTION.M_B} ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W} ${CONSTANTS.SIZES.CONNECTION.HALF_H}`;
+                this.element.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_TOP}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W}
+                    ${CONSTANTS.SIZES.CONNECTION.END_H}
+                `;
 
             // coming from the top of the previous element
             } else if (this.previousDirection === CONSTANTS.DIRECTIONS.BOTTOM) {
-                this.element.className = `mx-auto ${this.color} ${CONSTANTS.SIZES.CONNECTION.M_T} ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W} ${CONSTANTS.SIZES.CONNECTION.HALF_H}`;
+                this.element.className = `absolute
+                    ${this.colorTWCSS}
 
-            // coming from the left of the previous element
-            }  else if (this.previousDirection === CONSTANTS.DIRECTIONS.LEFT) {
-                this.element.className = `my-auto ${this.color} ${CONSTANTS.SIZES.CONNECTION.M_R} ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H} ${CONSTANTS.SIZES.CONNECTION.HALF_W}`;
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_BOTTOM}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W}
+                    ${CONSTANTS.SIZES.CONNECTION.END_H}
+                `;
 
             // coming from the right of the previous element
+            }  else if (this.previousDirection === CONSTANTS.DIRECTIONS.LEFT) {
+                this.element.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_LEFT}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H}
+                    ${CONSTANTS.SIZES.CONNECTION.END_W}
+                `;
+
+            // coming from the left of the previous element
             } else if (this.previousDirection === CONSTANTS.DIRECTIONS.RIGHT) {
-                this.element.className = `my-auto ${this.color} ${CONSTANTS.SIZES.CONNECTION.M_L} ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H} ${CONSTANTS.SIZES.CONNECTION.HALF_W}`;
+                this.element.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_RIGHT}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H}
+                    ${CONSTANTS.SIZES.CONNECTION.END_W}
+                `;
+            }
+        }
+            
+        // previous and next element both exist
+        //  > previous element is point or another connection element
+        //  > next element is point or another connection element
+        if (this.previous !== false && this.next !== false) {
+
+            // corner
+            //  |
+            //  '----
+            if (
+                (this.previousDirection === CONSTANTS.DIRECTIONS.TOP && this.nextDirection === CONSTANTS.DIRECTIONS.LEFT) ||
+                (this.previousDirection === CONSTANTS.DIRECTIONS.RIGHT && this.nextDirection === CONSTANTS.DIRECTIONS.BOTTOM)
+            ) {
+                this.element.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_TOP}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W}
+                    ${CONSTANTS.SIZES.CONNECTION.END_H}
+                `;
+
+                this.subElement.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_RIGHT}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H}
+                    ${CONSTANTS.SIZES.CONNECTION.CORNER_W}
+                `;
+                return;
+            }
+
+            // corner
+            //      |
+            //  ----'
+            if (
+                (this.previousDirection === CONSTANTS.DIRECTIONS.TOP && this.nextDirection === CONSTANTS.DIRECTIONS.RIGHT) ||
+                (this.previousDirection === CONSTANTS.DIRECTIONS.LEFT && this.nextDirection === CONSTANTS.DIRECTIONS.BOTTOM)
+            ) {
+                this.element.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_TOP}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W}
+                    ${CONSTANTS.SIZES.CONNECTION.END_H}
+                `;
+                
+                this.subElement.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_LEFT}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H}
+                    ${CONSTANTS.SIZES.CONNECTION.CORNER_W}
+                `;
+                return;
+            }
+
+            // corner
+            //  ,----
+            //  |
+            if (
+                (this.previousDirection === CONSTANTS.DIRECTIONS.BOTTOM && this.nextDirection === CONSTANTS.DIRECTIONS.LEFT) ||
+                (this.previousDirection === CONSTANTS.DIRECTIONS.RIGHT && this.nextDirection === CONSTANTS.DIRECTIONS.TOP)
+            ) {
+                this.element.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_BOTTOM}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W}
+                    ${CONSTANTS.SIZES.CONNECTION.END_H}
+                `;
+
+                this.subElement.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_RIGHT}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H}
+                    ${CONSTANTS.SIZES.CONNECTION.CORNER_W}
+                `;
+                return;
+            }
+
+            // corner
+            //  ----,
+            //      |
+            if (
+                (this.previousDirection === CONSTANTS.DIRECTIONS.BOTTOM && this.nextDirection === CONSTANTS.DIRECTIONS.RIGHT) ||
+                (this.previousDirection === CONSTANTS.DIRECTIONS.LEFT && this.nextDirection === CONSTANTS.DIRECTIONS.TOP)
+            ) {
+                this.element.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_BOTTOM}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W}
+                    ${CONSTANTS.SIZES.CONNECTION.END_H}
+                `;
+
+                this.subElement.className = `absolute
+                    ${this.colorTWCSS}
+
+                    ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                    ${CONSTANTS.SIZES.CONNECTION.POS_NO_SPACE_LEFT}
+
+                    ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H}
+                    ${CONSTANTS.SIZES.CONNECTION.CORNER_W}
+                `;
+                return;
+            }
+
+            // horizontal
+            if (this.previousDirection === CONSTANTS.DIRECTIONS.TOP || this.previousDirection === CONSTANTS.DIRECTIONS.BOTTOM) {
+                if (this.nextDirection === CONSTANTS.DIRECTIONS.TOP || this.nextDirection === CONSTANTS.DIRECTIONS.BOTTOM) {
+                    this.element.className = `absolute
+                        ${this.colorTWCSS}
+
+                        ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                        ${CONSTANTS.SIZES.CONNECTION.THICKNESS_W}
+                        ${CONSTANTS.SIZES.CONNECTION.FULL_H}
+                    `;
+                }
+            // vertical
+            } else if (this.previousDirection === CONSTANTS.DIRECTIONS.LEFT || this.previousDirection === CONSTANTS.DIRECTIONS.RIGHT) {
+                if (this.nextDirection === CONSTANTS.DIRECTIONS.LEFT || this.nextDirection === CONSTANTS.DIRECTIONS.RIGHT) {
+                    this.element.className = `absolute
+                        ${this.colorTWCSS}
+
+                        ${CONSTANTS.SIZES.CONNECTION.Z}
+
+                        ${CONSTANTS.SIZES.CONNECTION.THICKNESS_H}
+                        ${CONSTANTS.SIZES.CONNECTION.FULL_W}
+                    `;
+                }
+
+                return;
             }
         }
 
-        // previous and next element both exist
     }
 
     deleteSelf() {
@@ -104,11 +310,11 @@ export default class Connection implements TileTypeInterface {
         return false;
     }
 
+    //
+    // - getters
+    //
+
     getTileType(): ValueOf<T_TileTypeNumber> {
         return CONSTANTS.TILE_TYPES.CONNECTION;
-    }
-
-    getHTML(): HTMLDivElement {
-        return this.element;
     }
 }
