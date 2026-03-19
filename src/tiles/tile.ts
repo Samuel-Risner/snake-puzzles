@@ -98,7 +98,7 @@ export default class Tile implements TileInterface {
 
         const requiresBorderBottom = this.tileBottom._createElementRecursiveTile(parent, requiresBorderRight);
 
-        this.element.className = `${CONSTANTS.SIZES.TILE_W} ${CONSTANTS.SIZES.TILE_H} flex border-black border-t-2 border-l-2 ${requiresBorderRight? "border-r-2" : ""} ${requiresBorderBottom? "border-b-2" : ""}`
+        this.element.className = `${CONSTANTS.SIZES.TILE_W} ${CONSTANTS.SIZES.TILE_H} grid place-items-center border-black border-t-2 border-l-2 ${requiresBorderRight? "border-r-2" : ""} ${requiresBorderBottom? "border-b-2" : ""}`
 
         return false;
     }
