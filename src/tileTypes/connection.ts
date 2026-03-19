@@ -272,42 +272,33 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
 
     }
 
-    deleteSelf() {
+    //
+    // - delete
+    //
+
+    private deleteSelf() {
         this.tile.setTileType(null);
     }
 
-    deleteRecursively() {
+    private deleteRecursivelyPrevious() {
         this.deleteSelf();
 
         if (this.previous !== false && this.previous !== true) {
-            this.previous.deleteRecursively();
-        }
-
-        if (this.next !== false && this.next !== true) {
-            this.next.deleteRecursively();
+            this.previous.deleteRecursivelyPrevious();
         }
     }
 
-    deleteTrailRecursively(): boolean {
-        if (this.previous === true || this.next === true) {
-            return false;
-        }
+    private deleteRecursivelyNext() {
+        this.deleteSelf();
 
-        if (this.previous !== false) {
-            if (this.deleteTrailRecursively()) {
-                this.deleteSelf();
-                return true;
-            }
+        if (this.next !== false && this.next !== true) {
+            this.next.deleteRecursivelyNext();
         }
+    }
 
-        if (this.next !== false) {
-            if (this.deleteTrailRecursively()) {
-                this.deleteSelf();
-                return true;
-            }
-        }
-
-        return false;
+    deleteRecursively() {
+        this.deleteRecursivelyPrevious();
+        this.deleteRecursivelyNext();
     }
 
     //

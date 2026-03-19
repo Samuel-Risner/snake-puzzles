@@ -108,7 +108,7 @@ export default class Tile implements TileInterface {
 
     setTileType(t: null | TileTypeInterface) {
         // remove previous HTML
-        if (this.element.firstChild) this.element.removeChild(this.element.firstChild);
+        while (this.element.firstChild) this.element.removeChild(this.element.firstChild);
 
         this.tileTypeElement = t;
 
