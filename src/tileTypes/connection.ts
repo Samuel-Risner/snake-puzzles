@@ -30,23 +30,34 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
         this.tile.setTileType(this);
         this.setClassName();
 
-        const move = (e: MouseEvent) => {
-            console.log("CONNECTION MOVE");
+        const continueEventListener = (e: MouseEvent) => {
+            registerMoveDetection(move, up);
+        }
 
+        const move = (e: MouseEvent) => {
             // get next tile
             const [targetTile, direction] = this.tile.getAdjacentTileIfContains(e.clientX, e.clientY);
             if (targetTile === null) return;
-
-            console.log(direction);
-            this.nextDirection = direction;
-
+            
             // new connection
             this.next = new Connection(colorName, targetTile, this, direction, registerMoveDetection);
+
+            // update own style
+            this.nextDirection = direction;
             this.setClassName();
+
+            // remove old event listeners
+            this.element.removeEventListener("mousedown", continueEventListener);
+            this.subElement.removeEventListener("mousedown", continueEventListener);
         }
 
         const up = (e: MouseEvent) => {
-            console.log("CONNECTION UP");
+            // set event listener so that the connection can be continued later on
+            // but only if the connection is not connected to a point
+            if (this.previous === false || this.next === false) {
+                this.element.addEventListener("mousedown", continueEventListener);
+                this.subElement.addEventListener("mousedown", continueEventListener);
+            }
         }
 
         registerMoveDetection(move, up);
