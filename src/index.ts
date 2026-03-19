@@ -5,10 +5,16 @@ import type { T_GameFieldDataProcessed } from "./types";
 
 const GAME_FIELD_DATA: T_GameFieldDataProcessed = processGameFieldData({
     points: [
-            {
+        {
             head: [0, 0],
             tail: [5, 5],
             color: "RED"
+
+        },
+        {
+            head: [2, 2],
+            tail: [7, 5],
+            color: "BLUE"
 
         }
     ]
