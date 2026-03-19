@@ -1,8 +1,8 @@
-import type { T_GameFieldDataProcessed } from "../types";
-
 export default interface TileInterface {
 
     contains(x: number, y: number): boolean;
+
+    isIntractable(): boolean;
 
     //
     // - create HTML elements

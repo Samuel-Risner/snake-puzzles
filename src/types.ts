@@ -21,3 +21,9 @@ type X = {
 }
 
 export type T_GameFieldDataProcessed = Map<number, Map<number, X>>
+
+type T_ConnectionDirectionName = "STRAIGHT_HORIZONTAL" | "STRAIGHT_VERTICAL" | "KURVE_TOP_LEFT" | "KURVE_TOP_RIGHT" | "KURVE_BOTTOM_LEFT" | "KURVE_BOTTOM_RIGHT";
+export type T_ConnectionDirection = Record<T_ConnectionDirectionName, number>;
+
+type T_DirectionNames = "TOP" | "BOTTOM" | "LEFT" | "RIGHT";
+export type T_Directions = Record<T_DirectionNames, number>;

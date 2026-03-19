@@ -6,6 +6,10 @@ export default class TileEnd implements TileInterface {
         return false;
     }
 
+    isIntractable(): boolean {
+        return false;
+    }
+
     startCreateElementRecursive(): void {}
 
     _createElementRecursiveCol(): boolean {

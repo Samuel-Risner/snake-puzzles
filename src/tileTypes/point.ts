@@ -1,11 +1,14 @@
 import CONSTANTS from "../constants";
 import type Tile from "../tiles/tile";
 import type { ValueOf, T_ColorNumbers, T_ColorName, T_TileTypeNumber } from "../types";
+import Connection from "./connection";
 import type TileTypeInterface from "./tileTypeInterface";
 
 export default class Point implements TileTypeInterface {
 
     private tile: Tile;
+
+    private connection: null | Connection = null;
 
     private colorNumber: ValueOf<T_ColorNumbers>;
     private color: string;
@@ -21,7 +24,14 @@ export default class Point implements TileTypeInterface {
         this.element.className = `flex grow m-1 rounded-full ${this.color}`;
 
         const move = (e: MouseEvent) => {
-            console.log(`x: ${e.clientX} y: ${e.clientY}`);
+            // console.log(`x: ${e.clientX} y: ${e.clientY}`);
+            // console.log(this.tile.contains(e.clientX, e.clientY));
+
+            const [targetTile, direction] = this.tile.getAdjacentTileIfContains(e.clientX, e.clientY);
+            if (targetTile === null) return;
+
+            if (this.connection !== null) this.connection.deleteRecursively();
+            this.connection = new Connection(colorName, targetTile, true, direction);
         }
 
         const up = (e: MouseEvent) => {
