@@ -1,4 +1,8 @@
+import type { T_GameFieldDataProcessed } from "../types";
+
 export default interface TileInterface {
+
+    contains(x: number, y: number): boolean;
 
     //
     // - create HTML elements
@@ -8,6 +12,7 @@ export default interface TileInterface {
      * Starts the recursive creation for all the tiles
      * 
      * @param parent the HTML element to which all the tiles will be appended to
+     * @param fieldData data required for creating the game field
      */
     startCreateElementRecursive(parent: HTMLElement): void;
     /**

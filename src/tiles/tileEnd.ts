@@ -2,13 +2,17 @@ import type TileInterface from "./tileInterface";
 
 export default class TileEnd implements TileInterface {
 
-    startCreateElementRecursive(parent: HTMLElement): void {}
+    contains(): boolean {
+        return false;
+    }
 
-    _createElementRecursiveCol(parent: HTMLElement): boolean {
+    startCreateElementRecursive(): void {}
+
+    _createElementRecursiveCol(): boolean {
         return true;
     }
 
-    _createElementRecursiveTile(parent: HTMLElement, requiresBorderRight: boolean): boolean {
+    _createElementRecursiveTile(): boolean {
         return true;
     }
 

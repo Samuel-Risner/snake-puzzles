@@ -1,3 +1,4 @@
+import type { T_GameFieldData, T_GameFieldDataProcessed } from "../types";
 import Tile from "./tile";
 import TileEnd from "./tileEnd";
 
@@ -33,7 +34,7 @@ function linkTile(x: number, y: number, width: number, height: number, filed: Ti
  * 
  * @returns the created game field
  */
-export default function initGameField(width: number, height: number): Tile[][] {
+export default function initGameField(width: number, height: number, fieldData: T_GameFieldDataProcessed, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void): Tile[][] {
     const tileEnd = new TileEnd();
     const field: Tile[][] = [];
 
@@ -43,7 +44,7 @@ export default function initGameField(width: number, height: number): Tile[][] {
         field.push(column);
 
         for (let y = 0; y < height; y++) {
-            column.push(new Tile(tileEnd, x, y));
+            column.push(new Tile(tileEnd, x, y, fieldData, registerMoveDetection));
         }
     }
 

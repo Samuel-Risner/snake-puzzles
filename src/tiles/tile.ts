@@ -1,3 +1,8 @@
+import CONSTANTS from "../constants";
+import Connection from "../tileTypes/connection";
+import Point from "../tileTypes/point";
+import type TileTypeInterface from "../tileTypes/tileTypeInterface";
+import type { T_ColorName, T_Colors, T_GameFieldDataProcessed, ValueOf } from "../types";
 import type TileEnd from "./tileEnd";
 import type TileInterface from "./tileInterface";
 
@@ -11,7 +16,10 @@ export default class Tile implements TileInterface {
     private x: number;
     private y: number;
 
-    constructor(tileEnd: TileEnd, x: number, y: number) {
+    private tileElement: HTMLElement;
+    private tileTypeElement: TileTypeInterface | null;
+
+    constructor(tileEnd: TileEnd, x: number, y: number, fieldData: T_GameFieldDataProcessed, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
         this.tileTop = tileEnd;
         this.tileBottom = tileEnd;
         this.tileLeft = tileEnd;
@@ -19,6 +27,35 @@ export default class Tile implements TileInterface {
 
         this.x = x;
         this.y = y;
+
+        this.tileElement = document.createElement("div");
+
+        // set tile type element
+        let tileType = 0;
+        let color: T_ColorName = "RED";
+        const yMap = fieldData.get(x);
+        if (yMap !== undefined) {
+            const t = yMap.get(y);
+            if (t !== undefined) {
+                tileType = t.tileType;
+                color = t.color;
+            }
+        }
+        
+        if (tileType === CONSTANTS.TILE_TYPES.POINT) {
+            this.tileTypeElement = new Point(this, color, registerMoveDetection);
+        } else {
+            this.tileTypeElement = null;
+        }
+
+        if (this.tileTypeElement !== null) this.tileElement.appendChild(this.tileTypeElement.getHTML());
+    }
+
+    contains(x: number, y: number): boolean {
+        const rect = this.tileElement.getBoundingClientRect();
+
+        
+        return false;
     }
 
     //
@@ -38,17 +75,16 @@ export default class Tile implements TileInterface {
         const requiresBorderRight = this.tileRight._createElementRecursiveCol(parent);
 
         this._createElementRecursiveTile(newParent, requiresBorderRight);
-     
+
         return false;
     }
 
     _createElementRecursiveTile(parent: HTMLElement, requiresBorderRight: boolean): boolean {
-        const e = document.createElement("div");
-        parent.appendChild(e);
+        parent.appendChild(this.tileElement);
 
         const requiresBorderBottom = this.tileBottom._createElementRecursiveTile(parent, requiresBorderRight);
 
-        e.className = `w-8 h-8 bg-green-200 border-black border-t-2 border-l-2 ${requiresBorderRight? "border-r-2" : ""} ${requiresBorderBottom? "border-b-2" : ""}`
+        this.tileElement.className = `w-8 h-8 flex border-black border-t-2 border-l-2 ${requiresBorderRight? "border-r-2" : ""} ${requiresBorderBottom? "border-b-2" : ""}`
 
         return false;
     }
