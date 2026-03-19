@@ -17,12 +17,6 @@ export default class Point extends TileTypeBase implements TileTypeInterface {
         this.element.className = `absolute rounded-full ${this.colorTWCSS} ${CONSTANTS.SIZES.POINT.W} ${CONSTANTS.SIZES.POINT.H} ${CONSTANTS.SIZES.POINT.POS} ${CONSTANTS.SIZES.POINT.Z}`;
 
         const move = (e: MouseEvent) => {
-            // when returning to the point the connections will be deleted
-            if (this.tile.contains(e.clientX, e.clientY) && this.connection !== null) {
-                this.connection.deleteRecursively();
-                this.styleSubElement(null);
-            }
-
             const [targetTile, direction] = this.tile.getAdjacentTileIfContains(e.clientX, e.clientY);
             if (targetTile === null) return;
 
