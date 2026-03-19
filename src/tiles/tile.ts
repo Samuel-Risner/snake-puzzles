@@ -75,12 +75,12 @@ export default class Tile implements TileInterface {
     // - create HTML elements recursively
     //
 
-    startCreateElementRecursive(parent: HTMLElement): void {
+    startCreateElementRecursive(parent: HTMLElement) {
         parent.className = `flex flex-row z-0 ${CONSTANTS.SIZES.TILE.BORDER}`;
         this._createElementRecursiveCol(parent);
     }
 
-    _createElementRecursiveCol(parent: HTMLElement): void {
+    _createElementRecursiveCol(parent: HTMLElement) {
         const newParent = document.createElement("div");
         newParent.className = "flex flex-col";
         parent.appendChild(newParent);
@@ -89,9 +89,9 @@ export default class Tile implements TileInterface {
         this._createElementRecursiveTile(newParent);
     }
 
-    _createElementRecursiveTile(parent: HTMLElement): void {
+    _createElementRecursiveTile(parent: HTMLElement) {
         parent.appendChild(this.element);
-        
+
         this.tileBottom._createElementRecursiveTile(parent);
         this.element.className = `${CONSTANTS.SIZES.TILE.W} ${CONSTANTS.SIZES.TILE.H} z-0 relative flex items-center justify-center border-black ${CONSTANTS.SIZES.TILE.BORDER}`
     }
