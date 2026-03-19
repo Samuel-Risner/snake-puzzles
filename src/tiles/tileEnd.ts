@@ -11,13 +11,7 @@ export default class TileEnd implements TileInterface {
     }
 
     startCreateElementRecursive(): void {}
-
-    _createElementRecursiveCol(): boolean {
-        return true;
-    }
-
-    _createElementRecursiveTile(): boolean {
-        return true;
-    }
+    _createElementRecursiveCol(): void {}
+    _createElementRecursiveTile(): void {}
 
 }

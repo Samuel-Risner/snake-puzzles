@@ -80,32 +80,30 @@ export default class Tile implements TileInterface {
         this._createElementRecursiveCol(parent);
     }
 
-    _createElementRecursiveCol(parent: HTMLElement): boolean {
+    _createElementRecursiveCol(parent: HTMLElement): void {
         const newParent = document.createElement("div");
         newParent.className = "flex flex-col";
         parent.appendChild(newParent);
 
-        const requiresBorderRight = this.tileRight._createElementRecursiveCol(parent);
-
-        this._createElementRecursiveTile(newParent, requiresBorderRight);
-
-        return false;
+        this.tileRight._createElementRecursiveCol(parent);
+        this._createElementRecursiveTile(newParent);
     }
 
-    _createElementRecursiveTile(parent: HTMLElement, requiresBorderRight: boolean): boolean {
+    _createElementRecursiveTile(parent: HTMLElement): void {
         parent.appendChild(this.element);
-
-        const requiresBorderBottom = this.tileBottom._createElementRecursiveTile(parent, requiresBorderRight);
-
+        
+        this.tileBottom._createElementRecursiveTile(parent);
         this.element.className = `${CONSTANTS.SIZES.TILE.W} ${CONSTANTS.SIZES.TILE.H} z-0 relative flex items-center justify-center border-black ${CONSTANTS.SIZES.TILE.BORDER}`
-
-        return false;
     }
 
     //
     // - more complex setters
     //
 
+    /**
+     * Removes previous HTML children and adds the new ones (unless `t` is `null`)
+     * @param t either `null` if the tile should just be cleared or the new tile contents
+     */
     setTileType(t: null | TileTypeInterface) {
         // remove previous HTML
         while (this.element.firstChild) this.element.removeChild(this.element.firstChild);
