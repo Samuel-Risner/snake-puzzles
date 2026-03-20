@@ -17,7 +17,7 @@ export type T_GameFieldData = {
 
 type X = {
     tileType: T_TileTypeNumber["POINT"];
-    color: T_ColorName;
+    color: ValueOf<T_Colors>;
 }
 
 export type T_GameFieldDataProcessed = Map<number, Map<number, X>>

@@ -1,6 +1,6 @@
 import CONSTANTS from "../constants";
 import type Tile from "../tiles/tile";
-import type { ValueOf, T_TileTypeNumber, T_ColorNumbers, T_ColorName } from "../types";
+import type { ValueOf, T_TileTypeNumber, T_ColorNumbers, T_ColorName, T_Colors } from "../types";
 import type TileTypeInterface from "./tileTypeInterface";
 
 export default abstract class TileTypeBase implements TileTypeInterface {
@@ -12,14 +12,13 @@ export default abstract class TileTypeBase implements TileTypeInterface {
 
     protected colorTWCSS: string;
 
-    constructor(tile: Tile, colorName: T_ColorName) {
+    constructor(tile: Tile, colorTWCSS: ValueOf<T_Colors>) {
         this.tile = tile;
+        this.colorTWCSS = colorTWCSS;
 
         this.element = document.createElement("div");
         this.subElement = document.createElement("div");
         this.element.appendChild(this.subElement);
-
-        this.colorTWCSS = CONSTANTS.COLORS[colorName];
     }
 
     getTileType(): ValueOf<T_TileTypeNumber> {

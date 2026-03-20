@@ -12,7 +12,7 @@ export default function processGameFieldData(d: T_GameFieldData): T_GameFieldDat
             m.set(p.head[0], yMap);
         }
 
-        yMap.set(p.head[1], { tileType: CONSTANTS.TILE_TYPES.POINT, color: p.color });
+        yMap.set(p.head[1], { tileType: CONSTANTS.TILE_TYPES.POINT, color: CONSTANTS.COLORS[p.color] });
 
         yMap = m.get(p.tail[0]);
     
@@ -21,7 +21,7 @@ export default function processGameFieldData(d: T_GameFieldData): T_GameFieldDat
             m.set(p.tail[0], yMap);
         }
     
-        yMap.set(p.tail[1], { tileType: CONSTANTS.TILE_TYPES.POINT, color: p.color });
+        yMap.set(p.tail[1], { tileType: CONSTANTS.TILE_TYPES.POINT, color: CONSTANTS.COLORS[p.color] });
     })
 
     return m;

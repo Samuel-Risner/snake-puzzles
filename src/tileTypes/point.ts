@@ -1,7 +1,7 @@
 import CONSTANTS from "../constants";
 import invertDirection from "../helpers/inertDirection";
 import type Tile from "../tiles/tile";
-import type { ValueOf, T_ColorName, T_TileTypeNumber, T_Directions } from "../types";
+import type { ValueOf, T_ColorName, T_TileTypeNumber, T_Directions, T_Colors } from "../types";
 import Connection from "./connection";
 import TileTypeBase from "./tileTypeBase";
 import type TileTypeInterface from "./tileTypeInterface";
@@ -10,8 +10,8 @@ export default class Point extends TileTypeBase implements TileTypeInterface {
 
     private connection: null | Connection = null;
 
-    constructor(tile: Tile, colorName: T_ColorName, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
-        super(tile, colorName);
+    constructor(tile: Tile, colorTWCSS: ValueOf<T_Colors>, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
+        super(tile, colorTWCSS);
 
         this.tile = tile;
 
@@ -28,7 +28,7 @@ export default class Point extends TileTypeBase implements TileTypeInterface {
             }
 
             // new connection
-            this.connection = new Connection(colorName, targetTile, [0, this], direction, registerMoveDetection);
+            this.connection = new Connection(colorTWCSS, targetTile, [0, this], direction, registerMoveDetection);
             this.styleSubElement(direction);
         }
 
