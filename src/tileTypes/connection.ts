@@ -72,8 +72,9 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
 
         // backtrack
         const connection = targetTile.isConnection();
-        if (connection === this.previous[1]) {
-            console.log("BACKTRACK");
+        if (this.previous[0] === 2 && connection === this.previous[1]) {
+            this.deleteSelf();
+            connection.receiveBacktrack();
         }
         
         // sever other connection
@@ -154,6 +155,8 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
                     ${CONSTANTS.SIZES.CONNECTION.END_W}
                 `;
             }
+
+            this.subElement.className = "";
         }
             
         // previous and next element both exist
@@ -320,6 +323,16 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
         if (this === connection) return true;
         if (this.next[0] === 2) return this.next[1].connectionIncludesElement(connection);
         return false;
+    }
+
+    //
+    // - backtrack
+    //
+
+    receiveBacktrack() {
+        this.next = [1, null];
+        this.setupInteraction();
+        this.setClassName();
     }
 
     //
