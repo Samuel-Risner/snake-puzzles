@@ -110,7 +110,7 @@ export default class Tile implements TileInterface {
     //
 
     startCreateElementRecursive(parent: HTMLElement) {
-        parent.className = `flex flex-row z-0 ${CONSTANTS.SIZES.TILE.BORDER}`;
+        parent.className = `flex flex-row z-0 border-black w-fit ${CONSTANTS.SIZES.TILE.BORDER}`;
         this._createElementRecursiveCol(parent);
     }
 
