@@ -1,6 +1,6 @@
 import CONSTANTS from "../constants";
 import type Tile from "../tiles/tile";
-import type { T_ColorName, T_Directions, T_TileTypeNumber, ValueOf } from "../types";
+import type { T_ColorName, T_Colors, T_Directions, T_TileTypeNumber, ValueOf } from "../types";
 import type Point from "./point";
 import TileTypeBase from "./tileTypeBase";
 import type TileTypeInterface from "./tileTypeInterface";
@@ -20,65 +20,81 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
     private next: T_ConnectionState = [1, null];
     private nextDirection: ValueOf<T_Directions> = CONSTANTS.DIRECTIONS.TOP;
 
-    constructor(colorName: T_ColorName, tile: Tile, previous: T_ConnectionState, previousDirection: ValueOf<T_Directions>, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
-        super(tile, colorName);
+    private registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void;
+
+    constructor(colorTWCSS: ValueOf<T_Colors>, tile: Tile, previous: T_ConnectionState, previousDirection: ValueOf<T_Directions>, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
+        super(tile, colorTWCSS);
+
+        this.tile.setTileType(this);
 
         this.previous = previous;
         this.previousDirection = previousDirection;
 
-        this.element.className = "w-4 h-4 bg-green-300";
+        this.registerMoveDetection = registerMoveDetection;
 
-        this.tile.setTileType(this);
         this.setClassName();
+        this.setupInteraction();
 
-        const continueEventListener = (e: MouseEvent) => {
-            registerMoveDetection(move, up);
-        }
-
-        const move = (e: MouseEvent) => {
-            // get next tile
-            const [targetTile, direction] = this.tile.getAdjacentTileIfCollision(e.clientX, e.clientY);
-            if (targetTile === null || targetTile.isBlocked()) return;
-
-            // move to an empty tile
-            if (targetTile.isEmpty()) {
-                // new connection
-                this.next = [2, new Connection(colorName, targetTile, [2, this], direction, registerMoveDetection)];
-    
-                // update own style
-                this.nextDirection = direction;
-                this.setClassName();
-            }
-
-            // connect with point
-            const [isPoint, point] = targetTile.isPoint();
-            if (isPoint && point.tryConnect(this, direction)) {
-                this.next = [0, point];
-                // update own style
-                this.nextDirection = direction;
-                this.setClassName();
-            }
-
-            // backtrack
-            
-            // sever other connection
-
-            // remove old event listeners
-            this.element.removeEventListener("mousedown", continueEventListener);
-            this.subElement.removeEventListener("mousedown", continueEventListener);
-        }
-
-        const up = (e: MouseEvent) => {
-            // set event listener so that the connection can be continued later on
-            // but only if the connection is not connected to a point
-            if (this.previous[0] === 1 || this.next[0] === 1) {
-                this.element.addEventListener("mousedown", continueEventListener);
-                this.subElement.addEventListener("mousedown", continueEventListener);
-            }
-        }
-
-        registerMoveDetection(move, up);
+        this.setupInteraction = this.setupInteraction.bind(this);
     }
+
+    //
+    // - interaction
+    //
+
+    setupInteraction() {
+        this.registerMoveDetection(this.interactionMove.bind(this), this.interactionUp.bind(this));
+    }
+
+    interactionMove(e: MouseEvent) {
+        // get next tile
+        const [targetTile, direction] = this.tile.getAdjacentTileIfCollision(e.clientX, e.clientY);
+        if (targetTile === null || targetTile.isBlocked()) return;
+
+        // move to an empty tile
+        if (targetTile.isEmpty()) {
+            // new connection
+            this.next = [2, new Connection(this.colorTWCSS, targetTile, [2, this], direction, this.registerMoveDetection)];
+
+            // update own style
+            this.nextDirection = direction;
+            this.setClassName();
+        }
+
+        // connect with point
+        const [isPoint, point] = targetTile.isPoint();
+        if (isPoint && point.tryConnect(this, direction)) {
+            this.next = [0, point];
+            // update own style
+            this.nextDirection = direction;
+            this.setClassName();
+        }
+
+        // backtrack
+        const connection = targetTile.isConnection();
+        if (connection === this.previous[1]) {
+            console.log("BACKTRACK");
+        }
+        
+        // sever other connection
+
+        // remove old event listeners
+        this.element.removeEventListener("mousedown", this.setupInteraction);
+        this.subElement.removeEventListener("mousedown", this.setupInteraction);
+    }
+
+    interactionUp(e: MouseEvent) {
+        // set event listener so that the connection can be continued later on
+        // but only if the connection is not connected to a point
+        if (this.previous[0] === 1 || this.next[0] === 1) {
+            this.element.addEventListener("mousedown", this.setupInteraction);
+            this.subElement.addEventListener("mousedown", this.setupInteraction);
+        }
+    }
+
+    //
+    //
+    //
 
     setClassName() {
         // previous element exists but no next element
