@@ -1,6 +1,6 @@
 import CONSTANTS from "../constants";
 import type Tile from "../tiles/tile";
-import type { T_ColorName, T_Colors, T_Directions, T_TileTypeNumber, ValueOf } from "../types";
+import type { T_Colors, T_Directions, T_TileTypeNumber, ValueOf } from "../types";
 import type Point from "./point";
 import TileTypeBase from "./tileTypeBase";
 import type TileTypeInterface from "./tileTypeInterface";
@@ -72,9 +72,10 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
         }
 
         // connect with point
-        const [isPoint, point] = targetTile.isPoint();
-        if (isPoint && point.tryConnect(this, direction)) {
+        const point = targetTile.isPoint();
+        if (point !== null && point.tryConnect(this, direction)) {
             this.next = [0, point];
+
             // update own style
             this.nextDirection = direction;
             this.setClassName();
@@ -88,11 +89,10 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
         
         // sever other connection
         } else if (connection !== null && !connection.connectionIncludesElement(this)) {
-            console.log("CUT!");
             connection.severStart();
         }
         
-        // remove old event listeners
+        // remove event listeners
         this.removeEventListeners();
     }
 

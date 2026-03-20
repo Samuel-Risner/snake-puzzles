@@ -1,29 +1,30 @@
-import type { T_GameFieldDataProcessed } from "../types";
-import Tile from "./tile";
-import TileEnd from "./tileEnd";
+import type { T_GameFieldDataProcessed, T_RegisterMoveDetectionFunc } from "../types";
+import Tile from "../tiles/tile";
+import TileEnd from "../tiles/tileEnd";
 
 /**
  * Links a tile to the tiles around it (top, bottom, left, right)
  * If there is no tile on either the top, bottom, left ot right that step is skipped
  * 
  * @param x x position of the tile to handle
- * @param y z position of the tile to handle
- * @param width width of the game field
- * @param height height of the game field
- * @param filed the game field
+ * @param y y position of the tile to handle
+ * @param field the game field
  */
-function linkTile(x: number, y: number, width: number, height: number, filed: Tile[][]) {
+function linkTile(x: number, y: number, field: Tile[][]) {
+    const width = field.length;
+    const height = field[0].length;
+
     // top
-    if (y > 0) filed[x][y].setTileTop(filed[x][y - 1]);
+    if (y > 0) field[x][y].setTileTop(field[x][y - 1]);
     
     // bottom
-    if (y < height - 1) filed[x][y].setTileBottom(filed[x][y + 1]);
+    if (y < height - 1) field[x][y].setTileBottom(field[x][y + 1]);
     
     // left
-    if (x > 0) filed[x][y].setTileLeft(filed[x - 1][y]);
+    if (x > 0) field[x][y].setTileLeft(field[x - 1][y]);
     
     // right
-    if (x < width - 1) filed[x][y].setTileRight(filed[x + 1][y]);
+    if (x < width - 1) field[x][y].setTileRight(field[x + 1][y]);
 }
 
 /**
@@ -34,7 +35,7 @@ function linkTile(x: number, y: number, width: number, height: number, filed: Ti
  * 
  * @returns the created game field
  */
-export default function initGameField(width: number, height: number, fieldData: T_GameFieldDataProcessed, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void): Tile[][] {
+export default function initGameField(width: number, height: number, fieldData: T_GameFieldDataProcessed, registerMoveDetection: T_RegisterMoveDetectionFunc): Tile[][] {
     const tileEnd = new TileEnd();
     const field: Tile[][] = [];
 
@@ -51,7 +52,7 @@ export default function initGameField(width: number, height: number, fieldData: 
     // link tiles
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
-            linkTile(x, y, width, height, field);
+            linkTile(x, y, field);
         }
     }
 

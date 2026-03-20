@@ -1,17 +1,3 @@
-import type TileInterface from "./tileInterface";
+import TileBase from "./tileBase";
 
-export default class TileEnd implements TileInterface {
-
-    isBlocked(): boolean {
-        return true;
-    }
-    
-    collision(): boolean {
-        return false;
-    }
-
-    startCreateElementRecursive() {}
-    _createElementRecursiveCol() {}
-    _createElementRecursiveTile() {}
-
-}
+export default class TileEnd extends TileBase {}

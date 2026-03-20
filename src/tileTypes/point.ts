@@ -1,7 +1,7 @@
 import CONSTANTS from "../constants";
-import invertDirection from "../helpers/inertDirection";
+import invertDirection from "../helpers/invertDirection";
 import type Tile from "../tiles/tile";
-import type { ValueOf, T_ColorName, T_TileTypeNumber, T_Directions, T_Colors } from "../types";
+import type { ValueOf, T_TileTypeNumber, T_Directions, T_Colors } from "../types";
 import Connection from "./connection";
 import TileTypeBase from "./tileTypeBase";
 import type TileTypeInterface from "./tileTypeInterface";

@@ -1,6 +1,6 @@
 import CONSTANTS from "../constants";
 import type Tile from "../tiles/tile";
-import type { ValueOf, T_TileTypeNumber, T_ColorNumbers, T_ColorName, T_Colors } from "../types";
+import type { ValueOf, T_TileTypeNumber, T_Colors } from "../types";
 import type TileTypeInterface from "./tileTypeInterface";
 
 export default abstract class TileTypeBase implements TileTypeInterface {

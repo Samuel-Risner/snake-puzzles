@@ -2,37 +2,33 @@ import CONSTANTS from "../constants";
 import type Connection from "../tileTypes/connection";
 import Point from "../tileTypes/point";
 import type TileTypeInterface from "../tileTypes/tileTypeInterface";
-import type { T_ColorName, T_Colors, T_Directions, T_GameFieldDataProcessed, ValueOf } from "../types";
-import type TileEnd from "./tileEnd";
-import type TileInterface from "./tileInterface";
+import type { T_Colors, T_Directions, T_GameFieldDataProcessed, ValueOf } from "../types";
+import TileBase from "./tileBase";
 
-export default class Tile implements TileInterface {
+export default class Tile extends TileBase {
 
-    private tileTop: TileInterface;
-    private tileBottom: TileInterface;
-    private tileLeft: TileInterface;
-    private tileRight: TileInterface;
-
-    private x: number;
-    private y: number;
+    private tileTop: TileBase;
+    private tileBottom: TileBase;
+    private tileLeft: TileBase;
+    private tileRight: TileBase;
 
     private element: HTMLDivElement;
     private tileTypeElement: TileTypeInterface | null;
 
-    constructor(tileEnd: TileEnd, x: number, y: number, fieldData: T_GameFieldDataProcessed, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
+    constructor(tileEnd: TileBase, x: number, y: number, fieldData: T_GameFieldDataProcessed, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
+        super();
+        
         this.tileTop = tileEnd;
         this.tileBottom = tileEnd;
         this.tileLeft = tileEnd;
         this.tileRight = tileEnd;
 
-        this.x = x;
-        this.y = y;
-
         this.element = document.createElement("div");
 
-        // set tile type element
-        let tileType = 0;
+        // get tile type and color
+        let tileType = CONSTANTS.TILE_TYPES.BLOCKED;
         let color: ValueOf<T_Colors> = "RED";
+
         const yMap = fieldData.get(x);
         if (yMap !== undefined) {
             const t = yMap.get(y);
@@ -42,17 +38,23 @@ export default class Tile implements TileInterface {
             }
         }
         
+        // create tile type element
         if (tileType === CONSTANTS.TILE_TYPES.POINT) {
             this.tileTypeElement = new Point(this, color, registerMoveDetection);
         } else {
             this.tileTypeElement = null;
         }
 
+        // add tile type HTML
         if (this.tileTypeElement !== null) this.tileTypeElement.appendToParent(this.element);
     }
 
+    //
+    // - simple checks
+    //
+
     /**
-     * @implements
+     * @override
      */
     isBlocked(): boolean {
         if (this.tileTypeElement === null) return false;
@@ -64,10 +66,10 @@ export default class Tile implements TileInterface {
         return this.tileTypeElement === null;
     }
 
-    isPoint(): [true, Point] | [false, null] {
-        if (this.tileTypeElement === null || this.tileTypeElement.getTileType() !== CONSTANTS.TILE_TYPES.POINT) return [false, null];
+    isPoint(): Point | null {
+        if (this.tileTypeElement === null || this.tileTypeElement.getTileType() !== CONSTANTS.TILE_TYPES.POINT) return null;
 
-        return [true, this.tileTypeElement as Point];
+        return this.tileTypeElement as Point;
     }
 
     isConnection(): Connection | null {
@@ -77,6 +79,8 @@ export default class Tile implements TileInterface {
     }
 
     /**
+     * @override
+     * 
      * Checks if the coordinates collide with this tile (the HTML element)
      * 
      * @param x the x coordinate with which collision will be checked
@@ -109,12 +113,22 @@ export default class Tile implements TileInterface {
     // - create HTML elements recursively
     //
 
-    startCreateElementRecursive(parent: HTMLElement) {
+    /**
+     * @override
+     * 
+     * @param parent 
+     */
+    startCreateElementRecursive(parent: HTMLDivElement) {
         parent.className = `flex flex-row z-0 border-black w-fit ${CONSTANTS.SIZES.TILE.BORDER}`;
         this._createElementRecursiveCol(parent);
     }
 
-    _createElementRecursiveCol(parent: HTMLElement) {
+    /**
+     * @override
+     * 
+     * @param parent 
+     */
+    _createElementRecursiveCol(parent: HTMLDivElement) {
         const newParent = document.createElement("div");
         newParent.className = "flex flex-col";
         parent.appendChild(newParent);
@@ -123,7 +137,12 @@ export default class Tile implements TileInterface {
         this._createElementRecursiveTile(newParent);
     }
 
-    _createElementRecursiveTile(parent: HTMLElement) {
+    /**
+     * @override
+     * 
+     * @param parent 
+     */
+    _createElementRecursiveTile(parent: HTMLDivElement) {
         parent.appendChild(this.element);
 
         this.tileBottom._createElementRecursiveTile(parent);
@@ -136,6 +155,7 @@ export default class Tile implements TileInterface {
 
     /**
      * Removes previous HTML children and adds the new ones (unless `t` is `null`)
+     * 
      * @param t either `null` if the tile should just be cleared or the new tile contents
      */
     setTileType(t: null | TileTypeInterface) {
@@ -151,19 +171,19 @@ export default class Tile implements TileInterface {
     // - setters
     //
 
-    setTileTop(tile: TileInterface) {
+    setTileTop(tile: TileBase) {
         this.tileTop = tile;
     }
 
-    setTileBottom(tile: TileInterface) {
+    setTileBottom(tile: TileBase) {
         this.tileBottom = tile;
     }
 
-    setTileLeft(tile: TileInterface) {
+    setTileLeft(tile: TileBase) {
         this.tileLeft = tile;
     }
 
-    setTileRight(tile: TileInterface) {
+    setTileRight(tile: TileBase) {
         this.tileRight = tile;
     }
 
