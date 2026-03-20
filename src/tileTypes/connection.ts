@@ -319,7 +319,7 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
 
         // if previous is a point
         if (this.previous[0] === 0) {
-            // TODO: 
+            this.previous[1].disconnect();
             return;
         }
 
@@ -334,7 +334,7 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
 
         // if next is a point
         if (this.next[0] === 0) {
-            // TODO: 
+            this.next[1].disconnect();
             return;
         }
 
