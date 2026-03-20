@@ -2,7 +2,7 @@ import CONSTANTS from "../constants";
 import type Connection from "../tileTypes/connection";
 import Point from "../tileTypes/point";
 import type TileTypeInterface from "../tileTypes/tileTypeInterface";
-import type { T_ColorName, T_Directions, T_GameFieldDataProcessed, ValueOf } from "../types";
+import type { T_ColorName, T_Colors, T_Directions, T_GameFieldDataProcessed, ValueOf } from "../types";
 import type TileEnd from "./tileEnd";
 import type TileInterface from "./tileInterface";
 
@@ -32,7 +32,7 @@ export default class Tile implements TileInterface {
 
         // set tile type element
         let tileType = 0;
-        let color: T_ColorName = "RED";
+        let color: ValueOf<T_Colors> = "RED";
         const yMap = fieldData.get(x);
         if (yMap !== undefined) {
             const t = yMap.get(y);
@@ -68,6 +68,12 @@ export default class Tile implements TileInterface {
         if (this.tileTypeElement === null || this.tileTypeElement.getTileType() !== CONSTANTS.TILE_TYPES.POINT) return [false, null];
 
         return [true, this.tileTypeElement as Point];
+    }
+
+    isConnection(): Connection | null {
+        if (this.tileTypeElement === null || this.tileTypeElement.getTileType() !== CONSTANTS.TILE_TYPES.CONNECTION) return null;
+
+        return this.tileTypeElement as Connection;
     }
 
     /**
