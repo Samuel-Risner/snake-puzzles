@@ -20,13 +20,20 @@ export default abstract class TileTypeBase implements TileTypeInterface {
         this.subElement = document.createElement("div");
         this.element.appendChild(this.subElement);
 
-
         this.colorNumber = CONSTANTS.COLOR_NUMBERS[colorName];
         this.colorTWCSS = CONSTANTS.COLORS[colorName];
     }
 
     getTileType(): ValueOf<T_TileTypeNumber> {
         return CONSTANTS.TILE_TYPES.BLOCKED;
+    }
+
+    private getColorNumber() {
+        return this.colorNumber;
+    }
+
+    colorMatches(tileType: TileTypeBase): boolean {
+        return this.colorNumber === tileType.getColorNumber();
     }
 
     appendToParent(parent: HTMLDivElement) {

@@ -1,4 +1,5 @@
 import CONSTANTS from "../constants";
+import type Connection from "../tileTypes/connection";
 import Point from "../tileTypes/point";
 import type TileTypeInterface from "../tileTypes/tileTypeInterface";
 import type { T_ColorName, T_Directions, T_GameFieldDataProcessed, ValueOf } from "../types";
@@ -50,25 +51,52 @@ export default class Tile implements TileInterface {
         if (this.tileTypeElement !== null) this.tileTypeElement.appendToParent(this.element);
     }
 
-    contains(x: number, y: number): boolean {
+    /**
+     * @implements
+     */
+    isBlocked(): boolean {
+        if (this.tileTypeElement === null) return false;
+
+        return this.tileTypeElement.getTileType() === CONSTANTS.TILE_TYPES.EMPTY;
+    }
+
+    isEmpty(): boolean {
+        return this.tileTypeElement === null;
+    }
+
+    isPoint(): [true, Point] | [false, null] {
+        if (this.tileTypeElement === null || this.tileTypeElement.getTileType() !== CONSTANTS.TILE_TYPES.POINT) return [false, null];
+
+        return [true, this.tileTypeElement as Point];
+    }
+
+    /**
+     * Checks if the coordinates collide with this tile (the HTML element)
+     * 
+     * @param x the x coordinate with which collision will be checked
+     * @param y the y coordinate with which collision will be checked
+     * @returns if a collision occurred (`true`) or not (`false`)
+     */
+    collision(x: number, y: number): boolean {
         const rect = this.element.getBoundingClientRect();
 
         return (rect.x <= x && x <= rect.x + rect.width && rect.y <= y && y <= rect.y + rect.height);
     }
 
-    isIntractable(): boolean {
-        if (this.tileTypeElement === null) return true;
+    /**
+     * Checks for collision with one of the neighboring 4 tiles (only if the tiles are not blocked)
+     * 
+     * @param x the x coordinate with which collision will be checked
+     * @param y the x coordinate with which collision will be checked
+     * @returns a tile and this tiles relative position to it (eg. if the tile is to the left of this tile `right` will be returned because this tile is to the left of the other one)
+     */
+    getAdjacentTileIfCollision(x: number, y: number): [null | Tile, ValueOf<T_Directions>] {
+        if (this.tileTop.collision(x, y) && !this.tileTop.isBlocked()) return [this.tileTop as Tile, CONSTANTS.DIRECTIONS.BOTTOM];
+        if (this.tileBottom.collision(x, y) && !this.tileBottom.isBlocked()) return [this.tileBottom as Tile, CONSTANTS.DIRECTIONS.TOP];
+        if (this.tileLeft.collision(x, y) && !this.tileLeft.isBlocked()) return [this.tileLeft as Tile, CONSTANTS.DIRECTIONS.RIGHT];
+        if (this.tileRight.collision(x, y) && !this.tileRight.isBlocked()) return [this.tileRight as Tile, CONSTANTS.DIRECTIONS.LEFT];
 
-        return this.tileTypeElement.getTileType() === CONSTANTS.TILE_TYPES.EMPTY;
-    }
-
-    getAdjacentTileIfContains(x: number, y: number): [null | Tile, ValueOf<T_Directions>] {
-        if (this.tileTop.contains(x, y) && this.tileTop.isIntractable()) return [this.tileTop as Tile, CONSTANTS.DIRECTIONS.BOTTOM];
-        if (this.tileBottom.contains(x, y) && this.tileBottom.isIntractable()) return [this.tileBottom as Tile, CONSTANTS.DIRECTIONS.TOP];
-        if (this.tileLeft.contains(x, y) && this.tileLeft.isIntractable()) return [this.tileLeft as Tile, CONSTANTS.DIRECTIONS.RIGHT];
-        if (this.tileRight.contains(x, y) && this.tileRight.isIntractable()) return [this.tileRight as Tile, CONSTANTS.DIRECTIONS.LEFT];
-
-        return [null, CONSTANTS.DIRECTIONS.TOP];
+        return [null, -1];
     }
 
     //

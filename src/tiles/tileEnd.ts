@@ -2,11 +2,11 @@ import type TileInterface from "./tileInterface";
 
 export default class TileEnd implements TileInterface {
 
-    contains(): boolean {
-        return false;
+    isBlocked(): boolean {
+        return true;
     }
-
-    isIntractable(): boolean {
+    
+    collision(): boolean {
         return false;
     }
 

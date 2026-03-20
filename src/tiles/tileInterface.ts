@@ -1,8 +1,8 @@
 export default interface TileInterface {
 
-    contains(x: number, y: number): boolean;
+    isBlocked(): boolean;
 
-    isIntractable(): boolean;
+    collision(x: number, y: number): boolean;
 
     //
     // - create HTML elements

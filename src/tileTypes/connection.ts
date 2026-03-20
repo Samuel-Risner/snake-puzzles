@@ -5,7 +5,7 @@ import TileTypeBase from "./tileTypeBase";
 import type TileTypeInterface from "./tileTypeInterface";
 
 /**
- * true -> head
+ * true -> point
  * false -> nothing
  * Connection -> next Connection Element
  */
@@ -36,15 +36,31 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
 
         const move = (e: MouseEvent) => {
             // get next tile
-            const [targetTile, direction] = this.tile.getAdjacentTileIfContains(e.clientX, e.clientY);
-            if (targetTile === null) return;
-            
-            // new connection
-            this.next = new Connection(colorName, targetTile, this, direction, registerMoveDetection);
+            const [targetTile, direction] = this.tile.getAdjacentTileIfCollision(e.clientX, e.clientY);
+            if (targetTile === null || targetTile.isBlocked()) return;
 
-            // update own style
-            this.nextDirection = direction;
-            this.setClassName();
+            // move to an empty tile
+            if (targetTile.isEmpty()) {
+                // new connection
+                this.next = new Connection(colorName, targetTile, this, direction, registerMoveDetection);
+    
+                // update own style
+                this.nextDirection = direction;
+                this.setClassName();
+            }
+
+            // connect with point
+            const [isPoint, point] = targetTile.isPoint();
+            if (isPoint && point.tryConnect(this, direction)) {
+                this.next = true;
+                // update own style
+                this.nextDirection = direction;
+                this.setClassName();
+            }
+
+            // backtrack
+            
+            // sever other connection
 
             // remove old event listeners
             this.element.removeEventListener("mousedown", continueEventListener);
@@ -283,6 +299,12 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
 
     }
 
+    connectionIncludesElement(connection: Connection): boolean {
+        if (this === connection) return true;
+        if (this.next !== true && this.next !== false) return this.next.connectionIncludesElement(connection);
+        return false;
+    }
+
     //
     // - delete
     //
@@ -294,7 +316,12 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
     private deleteRecursivelyPrevious() {
         this.deleteSelf();
 
-        if (this.previous !== false && this.previous !== true) {
+        if (this.previous === true) {
+            // TODO: 
+            return;
+        }
+
+        if (this.previous !== false) {
             this.previous.deleteRecursivelyPrevious();
         }
     }
@@ -302,7 +329,12 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
     private deleteRecursivelyNext() {
         this.deleteSelf();
 
-        if (this.next !== false && this.next !== true) {
+        if (this.next === true) {
+            // TODO: 
+            return;
+        }
+
+        if (this.next !== false) {
             this.next.deleteRecursivelyNext();
         }
     }

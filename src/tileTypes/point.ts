@@ -1,4 +1,5 @@
 import CONSTANTS from "../constants";
+import invertDirection from "../helpers/inertDirection";
 import type Tile from "../tiles/tile";
 import type { ValueOf, T_ColorName, T_TileTypeNumber, T_Directions } from "../types";
 import Connection from "./connection";
@@ -17,7 +18,7 @@ export default class Point extends TileTypeBase implements TileTypeInterface {
         this.element.className = `absolute rounded-full ${this.colorTWCSS} ${CONSTANTS.SIZES.POINT.W} ${CONSTANTS.SIZES.POINT.H} ${CONSTANTS.SIZES.POINT.POS} ${CONSTANTS.SIZES.POINT.Z}`;
 
         const move = (e: MouseEvent) => {
-            const [targetTile, direction] = this.tile.getAdjacentTileIfContains(e.clientX, e.clientY);
+            const [targetTile, direction] = this.tile.getAdjacentTileIfCollision(e.clientX, e.clientY);
             if (targetTile === null) return;
 
             // delete previous connection
@@ -33,7 +34,7 @@ export default class Point extends TileTypeBase implements TileTypeInterface {
 
         const up = (e: MouseEvent) => {
             // when clicking the point the connections will be deleted
-            if (this.tile.contains(e.clientX, e.clientY) && this.connection !== null) {
+            if (this.tile.collision(e.clientX, e.clientY) && this.connection !== null) {
                 this.connection.deleteRecursively();
                 this.styleSubElement(null);
             } 
@@ -87,6 +88,24 @@ export default class Point extends TileTypeBase implements TileTypeInterface {
         }
     }
 
+    //
+    //
+    //
+
+    tryConnect(connection: Connection, direction: ValueOf<T_Directions>): boolean {
+        // can be connected
+        if ((this.connection === null || !this.connection.connectionIncludesElement(connection)) && this.colorMatches(connection)) {
+            this.connection = connection;
+            this.styleSubElement(invertDirection(direction));
+            return true;
+        }
+
+        return false;
+    }
+
+    //
+    // - getters
+    //
 
     getTileType(): ValueOf<T_TileTypeNumber> {
         return CONSTANTS.TILE_TYPES.POINT;
