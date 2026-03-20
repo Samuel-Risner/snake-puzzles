@@ -10,7 +10,6 @@ export default abstract class TileTypeBase implements TileTypeInterface {
     protected element: HTMLDivElement;
     protected subElement: HTMLDivElement;
 
-    protected colorNumber: ValueOf<T_ColorNumbers>;
     protected colorTWCSS: string;
 
     constructor(tile: Tile, colorName: T_ColorName) {
@@ -20,7 +19,6 @@ export default abstract class TileTypeBase implements TileTypeInterface {
         this.subElement = document.createElement("div");
         this.element.appendChild(this.subElement);
 
-        this.colorNumber = CONSTANTS.COLOR_NUMBERS[colorName];
         this.colorTWCSS = CONSTANTS.COLORS[colorName];
     }
 
@@ -28,12 +26,12 @@ export default abstract class TileTypeBase implements TileTypeInterface {
         return CONSTANTS.TILE_TYPES.BLOCKED;
     }
 
-    private getColorNumber() {
-        return this.colorNumber;
+    private getColorTWCSS() {
+        return this.colorTWCSS;
     }
 
     colorMatches(tileType: TileTypeBase): boolean {
-        return this.colorNumber === tileType.getColorNumber();
+        return this.colorTWCSS === tileType.getColorTWCSS();
     }
 
     appendToParent(parent: HTMLDivElement) {
