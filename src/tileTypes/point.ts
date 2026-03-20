@@ -28,7 +28,7 @@ export default class Point extends TileTypeBase implements TileTypeInterface {
             }
 
             // new connection
-            this.connection = new Connection(colorName, targetTile, true, direction, registerMoveDetection);
+            this.connection = new Connection(colorName, targetTile, [0, this], direction, registerMoveDetection);
             this.styleSubElement(direction);
         }
 
@@ -101,6 +101,11 @@ export default class Point extends TileTypeBase implements TileTypeInterface {
         }
 
         return false;
+    }
+
+    disconnect() {
+        this.connection = null;
+        this.styleSubElement(null);
     }
 
     //

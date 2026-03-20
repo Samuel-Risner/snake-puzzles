@@ -1,25 +1,26 @@
 import CONSTANTS from "../constants";
 import type Tile from "../tiles/tile";
 import type { T_ColorName, T_Directions, T_TileTypeNumber, ValueOf } from "../types";
+import type Point from "./point";
 import TileTypeBase from "./tileTypeBase";
 import type TileTypeInterface from "./tileTypeInterface";
 
 /**
- * true -> point
- * false -> nothing
- * Connection -> next Connection Element
+ * 0 -> point
+ * 1 -> nothing
+ * 2 -> next Connection Element
  */
-type T_Previous_Next = true | false | Connection;
+type T_ConnectionState = [0, Point] | [1, null] | [2, Connection];
 
 export default class Connection extends TileTypeBase implements TileTypeInterface {
 
-    private previous: T_Previous_Next;
+    private previous: T_ConnectionState;
     private previousDirection: ValueOf<T_Directions>;
 
-    private next: T_Previous_Next = false;
+    private next: T_ConnectionState = [1, null];
     private nextDirection: ValueOf<T_Directions> = CONSTANTS.DIRECTIONS.TOP;
 
-    constructor(colorName: T_ColorName, tile: Tile, previous: T_Previous_Next, previousDirection: ValueOf<T_Directions>, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
+    constructor(colorName: T_ColorName, tile: Tile, previous: T_ConnectionState, previousDirection: ValueOf<T_Directions>, registerMoveDetection: (move: (e: MouseEvent) => void, up: (e: MouseEvent) => void) => void) {
         super(tile, colorName);
 
         this.previous = previous;
@@ -42,7 +43,7 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
             // move to an empty tile
             if (targetTile.isEmpty()) {
                 // new connection
-                this.next = new Connection(colorName, targetTile, this, direction, registerMoveDetection);
+                this.next = [2, new Connection(colorName, targetTile, [2, this], direction, registerMoveDetection)];
     
                 // update own style
                 this.nextDirection = direction;
@@ -52,7 +53,7 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
             // connect with point
             const [isPoint, point] = targetTile.isPoint();
             if (isPoint && point.tryConnect(this, direction)) {
-                this.next = true;
+                this.next = [0, point];
                 // update own style
                 this.nextDirection = direction;
                 this.setClassName();
@@ -70,7 +71,7 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
         const up = (e: MouseEvent) => {
             // set event listener so that the connection can be continued later on
             // but only if the connection is not connected to a point
-            if (this.previous === false || this.next === false) {
+            if (this.previous[0] === 1 || this.next[0] === 1) {
                 this.element.addEventListener("mousedown", continueEventListener);
                 this.subElement.addEventListener("mousedown", continueEventListener);
             }
@@ -83,7 +84,7 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
         // previous element exists but no next element
         //  > previous element is point or another connection element
         //  > next element does not exist
-        if (this.previous !== false && this.next === false) {
+        if (this.previous[0] !== 1 && this.next[0] === 1) {
 
             // coming from the bottom of the previous element
             if (this.previousDirection === CONSTANTS.DIRECTIONS.TOP) {
@@ -142,7 +143,7 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
         // previous and next element both exist
         //  > previous element is point or another connection element
         //  > next element is point or another connection element
-        if (this.previous !== false && this.next !== false) {
+        if (this.previous[0] !== 1 && this.next[0] !== 1) {
 
             // corner
             //  |
@@ -301,7 +302,7 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
 
     connectionIncludesElement(connection: Connection): boolean {
         if (this === connection) return true;
-        if (this.next !== true && this.next !== false) return this.next.connectionIncludesElement(connection);
+        if (this.next[0] === 2) return this.next[1].connectionIncludesElement(connection);
         return false;
     }
 
@@ -316,26 +317,30 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
     private deleteRecursivelyPrevious() {
         this.deleteSelf();
 
-        if (this.previous === true) {
+        // if previous is a point
+        if (this.previous[0] === 0) {
             // TODO: 
             return;
         }
 
-        if (this.previous !== false) {
-            this.previous.deleteRecursivelyPrevious();
+        // if previous is a connection
+        if (this.previous[0] === 2) {
+            this.previous[1].deleteRecursivelyPrevious();
         }
     }
 
     private deleteRecursivelyNext() {
         this.deleteSelf();
 
-        if (this.next === true) {
+        // if next is a point
+        if (this.next[0] === 0) {
             // TODO: 
             return;
         }
 
-        if (this.next !== false) {
-            this.next.deleteRecursivelyNext();
+        // if next is a connection
+        if (this.next[0] === 2) {
+            this.next[1].deleteRecursivelyNext();
         }
     }
 
