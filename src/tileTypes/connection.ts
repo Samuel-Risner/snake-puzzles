@@ -46,6 +46,16 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
         this.registerMoveDetection(this.interactionMove.bind(this), this.interactionUp.bind(this));
     }
 
+    private addEventListeners() {
+        this.element.addEventListener("mousedown", this.setupInteraction);
+        this.subElement.addEventListener("mousedown", this.setupInteraction);
+    }
+
+    private removeEventListeners() {
+        this.element.removeEventListener("mousedown", this.setupInteraction);
+        this.subElement.removeEventListener("mousedown", this.setupInteraction);
+    }
+
     interactionMove(e: MouseEvent) {
         // get next tile
         const [targetTile, direction] = this.tile.getAdjacentTileIfCollision(e.clientX, e.clientY);
@@ -75,22 +85,21 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
         if (this.previous[0] === 2 && connection === this.previous[1]) {
             this.deleteSelf();
             connection.receiveBacktrack();
-        }
         
         // sever other connection
-
+        } else if (connection !== null && !connection.connectionIncludesElement(this)) {
+            console.log("CUT!");
+            connection.severStart();
+        }
+        
         // remove old event listeners
-        this.element.removeEventListener("mousedown", this.setupInteraction);
-        this.subElement.removeEventListener("mousedown", this.setupInteraction);
+        this.removeEventListeners();
     }
 
     interactionUp(e: MouseEvent) {
         // set event listener so that the connection can be continued later on
         // but only if the connection is not connected to a point
-        if (this.previous[0] === 1 || this.next[0] === 1) {
-            this.element.addEventListener("mousedown", this.setupInteraction);
-            this.subElement.addEventListener("mousedown", this.setupInteraction);
-        }
+        if (this.previous[0] === 1 || this.next[0] === 1) this.addEventListeners();
     }
 
     //
@@ -319,10 +328,75 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
 
     }
 
-    connectionIncludesElement(connection: Connection): boolean {
+    //
+    // - sever
+    //
+
+    private severRecursivelyPrevious(): boolean {
+        // do not delete if connected to point
+        if (this.previous[0] === 0) return false;
+
+        // delete self if previous is <null>
+        if (this.previous[0] === 1) {
+            this.deleteSelf();
+            return true;
+        
+        // delete if previous says so (is not connected to point)
+        } else if (this.previous[1].severRecursivelyPrevious()) {
+            this.deleteSelf();
+            return true;
+
+        // otherwise do nothing
+        } else {
+            return false;
+        }
+    }
+
+    private severRecursivelyNext(): boolean {
+        // do not delete if connected to point
+        if (this.next[0] === 0) return false;
+
+        // delete self if next is <null>
+        if (this.next[0] === 1) {
+            this.deleteSelf();
+            return true;
+        
+        // delete if next says so (is not connected to point)
+        } else if (this.next[1].severRecursivelyNext()) {
+            this.deleteSelf();
+            return true;
+
+        // otherwise do nothing
+        } else {
+            return false;
+        }
+    }
+
+    private severStart() {
+        this.deleteSelf();
+
+        if (this.previous[0] === 2) {
+            this.previous[1].deleteNext();
+            if (!this.previous[1].severRecursivelyPrevious()) this.previous[1].addEventListeners();
+        }
+        
+        if (this.next[0] === 2) {
+            this.next[1].deletePrevious();
+            if (!this.next[1].severRecursivelyNext()) this.next[1].addEventListeners();
+        }
+
+    }
+
+    connectionIncludesElement(connection: Connection, dir: undefined | 0 | 1 = undefined): boolean {
         if (this === connection) return true;
-        if (this.next[0] === 2) return this.next[1].connectionIncludesElement(connection);
-        return false;
+
+        if (dir === 0) {
+            return this.previous[0] === 2? this.previous[1].connectionIncludesElement(connection, 0) : false;
+        } else if (dir === 1) {
+            return this.next[0] === 2? this.next[1].connectionIncludesElement(connection, 1) : false;
+        } else { // for undefined
+            return this.previous[0] === 2? this.previous[1].connectionIncludesElement(connection, 0) : false || this.next[0] === 2? this.next[1].connectionIncludesElement(connection, 1) : false;
+        }
     }
 
     //
@@ -341,6 +415,16 @@ export default class Connection extends TileTypeBase implements TileTypeInterfac
 
     private deleteSelf() {
         this.tile.setTileType(null);
+    }
+
+    deletePrevious() {
+        this.previous = [1, null];
+        this.setClassName();
+    }
+
+    deleteNext() {
+        this.next = [1, null];
+        this.setClassName();
     }
 
     private deleteRecursivelyPrevious() {
